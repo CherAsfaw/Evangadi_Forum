@@ -1,175 +1,90 @@
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
-import style from "./register.module.css";
-import { useState, useRef } from "react";
-import axios from "../../API/axiosConfig";
-import About from "../landing/About";
-import Layout from "../../Component/layout/Layout";
+import React, { useRef } from "react";
+import { Link, useNavigate } from "react-router-dom"; // ✅ Use `useNavigate` for redirection
+import styles from "./register.module.css";
+import axios from "../../API/axiosConfig"; // ✅ Import axios for API requests
 
 function Register() {
-  const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate()
-  const [validation, setValidation] = useState({
-    email: false,
-    firstName: false,
-    lastName: false,
-    userName: false,
-    password: false,
-  });
-
+  const usernameDom = useRef();
+  const firstnameDom = useRef();
+  const lastnameDom = useRef();
   const emailDom = useRef();
-  const firstNameDom = useRef();
-  const lastNameDom = useRef();
-  const userNameDom = useRef();
   const passwordDom = useRef();
+  const navigate = useNavigate(); // ✅ Navigation after successful registration
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const emailValue = emailDom.current.value;
-    const firstNameValue = firstNameDom.current.value;
-    const lastNameValue = lastNameDom.current.value;
-    const userNameValue = userNameDom.current.value;
+    const usernameValue = usernameDom.current.value.trim();
+    const firstnameValue = firstnameDom.current.value.trim();
+    const lastnameValue = lastnameDom.current.value.trim();
+    const emailValue = emailDom.current.value.trim();
     const passwordValue = passwordDom.current.value;
 
     if (
+      !usernameValue ||
+      !firstnameValue ||
+      !lastnameValue ||
       !emailValue ||
-      !firstNameValue ||
-      !lastNameValue ||
-      !userNameValue ||
       !passwordValue
     ) {
-      setValidation({
-        email: !emailValue,
-        firstName: !firstNameValue,
-        lastName: !lastNameValue,
-        userName: !userNameValue,
-        password: !passwordValue,
-      });
-
+      alert("Please provide all required information.");
       return;
     }
+
     try {
       await axios.post("/user/register", {
+        user_name: usernameValue,
+        first_name: firstnameValue,
+        last_name: lastnameValue,
         email: emailValue,
-        first_name: firstNameValue,
-        last_name: lastNameValue,
-        user_name: userNameValue,
-        password: passwordValue
+        password: passwordValue,
       });
-      alert("registered successfully")
-      navigate('/login')
+
+      alert("Registration Successful! Redirecting to Login...");
+      navigate("/login"); // ✅ Redirect to login after successful registration
     } catch (error) {
-      alert('server error');
-      console.log(error.response);
+      const errorMessage =
+        error.response?.data?.message ||
+        "Something went wrong. Please try again.";
+      alert(errorMessage);
     }
   }
 
   return (
-    <Layout>
-      <section className={style.main_container}>
-        <div className={style.container}>
-          <h1>Join the network</h1>
-          <p>
-            Already have an account?<Link to="/"> Sign in</Link>
-          </p>
-          <form onSubmit={handleSubmit}>
-            <input
-              ref={emailDom}
-              type="email"
-              id="email"
-              name="email"
-              placeholder="email"
-              style={{
-                border: validation.email ? "1px solid #ff4444" : "",
-              }}
-            />
-            {validation.email && (
-              <span className={style.danger}>Please Enter Your Email</span>
-            )}
-            <div className={style.container_name}>
-              <div className={style.container_name_each}>
-                <input
-                  ref={firstNameDom}
-                  type="text"
-                  name="first_name"
-                  id="firstname"
-                  placeholder="First Name"
-                  style={{
-                    border: validation.firstName ? "1px solid #ff4444" : "",
-                  }}
-                />
-                {validation.firstName && (
-                  <span className={style.danger}>
-                    Please Enter Your First Name
-                  </span>
-                )}
-              </div>
-              <div className={style.container_name_each}>
-                <input
-                  ref={lastNameDom}
-                  type="text"
-                  name="last_name"
-                  id="lastname"
-                  placeholder="Last Name"
-                  style={{
-                    border: validation.lastName ? "1px solid #ff4444" : "",
-                  }}
-                />
-                {validation.lastName && (
-                  <span className={style.danger}>
-                    Please Enter Your Last Name
-                  </span>
-                )}
-              </div>
-            </div>
-            <input
-              ref={userNameDom}
-              type="text"
-              id="username"
-              name="user_name"
-              placeholder="User Name"
-              style={{
-                border: validation.userName ? "1px solid #ff4444" : "",
-              }}
-            />
-            {validation.userName && (
-              <span className={style.danger}>Please Enter Your User Name</span>
-            )}
-            <div className={style.password}>
-              <input
-                ref={passwordDom}
-                type={showPassword ? "text" : "password"}
-                id="password"
-                name="password"
-                placeholder="Password"
-                style={{
-                  border: validation.password ? "1px solid #ff4444" : "",
-                }}
-              />
-              <span
-                className={style.showPass}
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </span>
-            </div>
-            {validation.password && (
-              <span className={style.danger}>Please Enter Your Password</span>
-            )}
-            <button type="submit">Agree and join</button>
-          </form>
-          <p>
-            I agree to the <a href="/">privacy policy</a>. and{" "}
-            <a href="">terms of service</a>.
-          </p>
-          <Link>Already have an account</Link>
+    <div className={styles.registerCard}>
+      <h2>Join the network</h2>
+      <form onSubmit={handleSubmit}>
+        <input ref={emailDom} type="email" placeholder="Email" required />
+        <div className={styles.input_name}>
+          <input
+            ref={firstnameDom}
+            type="text"
+            placeholder="First Name"
+            required
+          />
+          <input
+            ref={lastnameDom}
+            type="text"
+            placeholder="Last Name"
+            required
+          />
         </div>
-        <div>
-          <About />
-        </div>
-      </section>
-    </Layout>
+        <input ref={usernameDom} type="text" placeholder="Username" required />
+
+        <input
+          ref={passwordDom}
+          type="password"
+          placeholder="Password"
+          required
+        />
+        <button type="submit">Agree and Join</button>
+      </form>
+      <div>
+        I agree to <Link>privacy policy</Link> and <Link>terms of service</Link>
+      </div>
+      <Link to="/login" className={styles.toggleLogin}>
+        Already have an account? Login
+      </Link>
+    </div>
   );
 }
 
