@@ -1,15 +1,26 @@
 import React, { useRef } from "react";
-import { Link, useNavigate } from "react-router-dom"; // ✅ Use `useNavigate` for redirection
+import { Link } from "react-router-dom";
 import styles from "./register.module.css";
-import axios from "../../API/axiosConfig"; // ✅ Import axios for API requests
+import axios from "../../API/axiosConfig";
 
-function Register() {
+function Register({ visible }) {
   const usernameDom = useRef();
   const firstnameDom = useRef();
   const lastnameDom = useRef();
   const emailDom = useRef();
   const passwordDom = useRef();
-  const navigate = useNavigate(); // ✅ Navigation after successful registration
+  const { setShow } = visible || {};
+
+  function showStyledAlert(message) {
+    const alertBox = document.createElement("div");
+    alertBox.className = styles.customAlert;
+    alertBox.innerText = message;
+    document.body.appendChild(alertBox);
+
+    setTimeout(() => {
+      alertBox.remove();
+    }, 3000);
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -26,7 +37,7 @@ function Register() {
       !emailValue ||
       !passwordValue
     ) {
-      alert("Please provide all required information.");
+      showStyledAlert("Please provide all information");
       return;
     }
 
@@ -38,50 +49,43 @@ function Register() {
         email: emailValue,
         password: passwordValue,
       });
-
-      alert("Registration Successful! Redirecting to Login...");
-      navigate("/login"); // ✅ Redirect to login after successful registration
+      showStyledAlert("Registration Successful! Switching to Login...");
+      setTimeout(() => setShow?.(false), 1500);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
         "Something went wrong. Please try again.";
-      alert(errorMessage);
+      showStyledAlert(errorMessage);
     }
   }
 
   return (
     <div className={styles.registerCard}>
-      <h2>Join the network</h2>
+      <h2>Create Your Account</h2>
       <form onSubmit={handleSubmit}>
-        <input ref={emailDom} type="email" placeholder="Email" required />
-        <div className={styles.input_name}>
-          <input
-            ref={firstnameDom}
-            type="text"
-            placeholder="First Name"
-            required
-          />
-          <input
-            ref={lastnameDom}
-            type="text"
-            placeholder="Last Name"
-            required
-          />
-        </div>
-        <input ref={usernameDom} type="text" placeholder="Username" required />
-
+        <input ref={usernameDom} type="text" placeholder="Username" />
+        <input
+          ref={firstnameDom}
+          type="text"
+          placeholder="First Name"
+          required
+        />
+        <input ref={lastnameDom} type="text" placeholder="Last Name" />
+        <input ref={emailDom} type="email" placeholder="Email" />
         <input
           ref={passwordDom}
           type="password"
           placeholder="Password"
           required
         />
-        <button type="submit">Agree and Join</button>
+        <button type="submit">Register</button>
       </form>
-      <div>
-        I agree to <Link>privacy policy</Link> and <Link>terms of service</Link>
-      </div>
-      <Link to="/login" className={styles.toggleLogin}>
+
+      <Link
+        to="/login"
+        onClick={() => handleToggl(false)}
+        className={styles.toggleLogin}
+      >
         Already have an account? Login
       </Link>
     </div>
